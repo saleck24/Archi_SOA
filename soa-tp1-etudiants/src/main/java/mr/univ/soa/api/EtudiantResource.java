@@ -51,4 +51,74 @@ public class EtudiantResource {
             .path(String.valueOf(cree.getId())).build();
         return Response.created(uri).entity(cree).build();
     }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response modifier(@PathParam("id") long id, Etudiant entree) {
+        if (entree == null
+            || entree.getNom() == null
+            || entree.getNom().isBlank()
+            || entree.getEmail() == null
+            || !entree.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(Map.of("erreur", "DONNEES_INVALIDES",
+                               "message", "Nom ou email invalide"))
+                .build();
+        }
+        Etudiant misAJour = service.remplacer(id, entree.getNom(), entree.getEmail());
+        if (misAJour == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(Map.of("erreur", "ETUDIANT_INTROUVABLE",
+                               "message", "Identifiant inconnu"))
+                .build();
+        }
+        return Response.ok(misAJour).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response modifierPartiel(@PathParam("id") long id, Etudiant entree) {
+        if (entree == null || (entree.getNom() == null && entree.getEmail() == null)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(Map.of("erreur", "DONNEES_INVALIDES",
+                               "message", "Au moins un champ (nom ou email) doit être renseigné"))
+                .build();
+        }
+        if (entree.getNom() != null && entree.getNom().isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(Map.of("erreur", "DONNEES_INVALIDES",
+                               "message", "Le nom ne peut pas être vide"))
+                .build();
+        }
+        if (entree.getEmail() != null && !entree.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(Map.of("erreur", "DONNEES_INVALIDES",
+                               "message", "Format d'email invalide"))
+                .build();
+        }
+
+        Etudiant misAJour = service.modifierPartiel(id, entree.getNom(), entree.getEmail());
+        if (misAJour == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(Map.of("erreur", "ETUDIANT_INTROUVABLE",
+                               "message", "Identifiant inconnu"))
+                .build();
+        }
+        return Response.ok(misAJour).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response supprimer(@PathParam("id") long id) {
+        boolean supprime = service.supprimer(id);
+        if (!supprime) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(Map.of("erreur", "ETUDIANT_INTROUVABLE",
+                               "message", "Identifiant inconnu"))
+                .build();
+        }
+        return Response.noContent().build();
+    }
 }

@@ -1,13 +1,15 @@
 openapi: 3.0.3
 info:
   title: API Etudiants - TP1 SOA
-  version: 1.0.0
+  description: API REST pour la gestion d'un registre d'étudiants (Jakarta EE 10, JAX-RS)
+  version: 1.1.0
 servers:
   - url: http://localhost:8080/soa-tp1/api
 paths:
   /etudiants:
     get:
       summary: Lister les etudiants
+      description: Retourne la liste complète des étudiants triée par identifiant
       responses:
         '200':
           description: Liste retournee
@@ -19,6 +21,7 @@ paths:
                   $ref: '#/components/schemas/Etudiant'
     post:
       summary: Creer un etudiant
+      description: Ajoute un nouvel étudiant et lui attribue un identifiant unique
       requestBody:
         required: true
         content:
@@ -39,16 +42,19 @@ paths:
                 $ref: '#/components/schemas/Etudiant'
         '400':
           $ref: '#/components/responses/ErreurValidation'
+
   /etudiants/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identifiant unique de l'étudiant
+        schema:
+          type: integer
+          format: int64
     get:
       summary: Consulter un etudiant
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      description: Récupère les informations d'un étudiant par son identifiant
       responses:
         '200':
           description: Etudiant trouve
@@ -57,11 +63,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/Etudiant'
         '404':
-          description: Etudiant introuvable
+          $ref: '#/components/responses/ErreurIntrouvable'
+    put:
+      summary: Mettre a jour un etudiant (remplacement complet)
+      description: Remplace l'intégralité des données (nom et email) d'un étudiant existant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantEntree'
+      responses:
+        '200':
+          description: Etudiant mis a jour
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Erreur'
+                $ref: '#/components/schemas/Etudiant'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    patch:
+      summary: Mettre a jour partiellement un etudiant
+      description: Modifie sélectivement le nom, l'email ou les deux pour un étudiant existant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtudiantPatch'
+      responses:
+        '200':
+          description: Etudiant partiellement modifie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Etudiant'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    delete:
+      summary: Supprimer un etudiant
+      description: Supprime définitivement l'étudiant identifié
+      responses:
+        '204':
+          description: Etudiant supprime avec succes (aucun contenu)
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+
 components:
   schemas:
     EtudiantEntree:
@@ -71,9 +122,22 @@ components:
         nom:
           type: string
           minLength: 1
+          example: Aminata
         email:
           type: string
           format: email
+          example: aminata@example.org
+    EtudiantPatch:
+      type: object
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          example: Aminata Diop
+        email:
+          type: string
+          format: email
+          example: aminata.diop@example.org
     Etudiant:
       allOf:
         - $ref: '#/components/schemas/EtudiantEntree'
@@ -83,17 +147,26 @@ components:
             id:
               type: integer
               format: int64
+              example: 1
     Erreur:
       type: object
       required: [erreur, message]
       properties:
         erreur:
           type: string
+          example: DONNEES_INVALIDES
         message:
           type: string
+          example: Nom ou email invalide
   responses:
     ErreurValidation:
       description: Entree invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erreur'
+    ErreurIntrouvable:
+      description: Etudiant introuvable
       content:
         application/json:
           schema:

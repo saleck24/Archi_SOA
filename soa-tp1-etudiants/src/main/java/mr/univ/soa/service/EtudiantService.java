@@ -29,4 +29,32 @@ public class EtudiantService {
         donnees.put(id, e);
         return e;
     }
+
+    public boolean supprimer(long id) {
+        return donnees.remove(id) != null;
+    }
+
+    public Etudiant remplacer(long id, String nom, String email) {
+        Etudiant existant = donnees.get(id);
+        if (existant == null) {
+            return null;
+        }
+        existant.setNom(nom.trim());
+        existant.setEmail(email.trim());
+        return existant;
+    }
+
+    public Etudiant modifierPartiel(long id, String nom, String email) {
+        Etudiant existant = donnees.get(id);
+        if (existant == null) {
+            return null;
+        }
+        if (nom != null && !nom.isBlank()) {
+            existant.setNom(nom.trim());
+        }
+        if (email != null && !email.isBlank()) {
+            existant.setEmail(email.trim());
+        }
+        return existant;
+    }
 }
