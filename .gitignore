@@ -1,0 +1,20 @@
+# Build & binaries
+target/
+*.war
+*.class
+
+# Documents & rapports
+*.pdf
+*.docx
+*.doc
+*.docs
+TP1.docs
+TP1 REST.pdf
+SUPPORT DE COURS.pdf
+
+# IDE & system
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
