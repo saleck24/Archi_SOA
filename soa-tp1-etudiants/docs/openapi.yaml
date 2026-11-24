@@ -1,15 +1,18 @@
 openapi: 3.0.3
 info:
-  title: API Etudiants - TP1 SOA
-  description: API REST pour la gestion d'un registre d'étudiants (Jakarta EE 10, JAX-RS)
-  version: 1.1.0
+  title: API Universite - TP1 SOA
+  description: API REST Jakarta EE 10 (JAX-RS) pour la gestion des Etudiants, Departements et Modules
+  version: 1.2.0
 servers:
   - url: http://localhost:8080/soa-tp1/api
 paths:
+  # =========================================================
+  # ETUDIANTS
+  # =========================================================
   /etudiants:
     get:
       summary: Lister les etudiants
-      description: Retourne la liste complète des étudiants triée par identifiant
+      tags: [Etudiants]
       responses:
         '200':
           description: Liste retournee
@@ -21,7 +24,7 @@ paths:
                   $ref: '#/components/schemas/Etudiant'
     post:
       summary: Creer un etudiant
-      description: Ajoute un nouvel étudiant et lui attribue un identifiant unique
+      tags: [Etudiants]
       requestBody:
         required: true
         content:
@@ -33,7 +36,6 @@ paths:
           description: Etudiant cree
           headers:
             Location:
-              description: URI de la ressource creee
               schema:
                 type: string
           content:
@@ -48,13 +50,12 @@ paths:
       - name: id
         in: path
         required: true
-        description: Identifiant unique de l'étudiant
         schema:
           type: integer
           format: int64
     get:
       summary: Consulter un etudiant
-      description: Récupère les informations d'un étudiant par son identifiant
+      tags: [Etudiants]
       responses:
         '200':
           description: Etudiant trouve
@@ -65,8 +66,8 @@ paths:
         '404':
           $ref: '#/components/responses/ErreurIntrouvable'
     put:
-      summary: Mettre a jour un etudiant (remplacement complet)
-      description: Remplace l'intégralité des données (nom et email) d'un étudiant existant
+      summary: Remplacer un etudiant (PUT)
+      tags: [Etudiants]
       requestBody:
         required: true
         content:
@@ -85,8 +86,8 @@ paths:
         '404':
           $ref: '#/components/responses/ErreurIntrouvable'
     patch:
-      summary: Mettre a jour partiellement un etudiant
-      description: Modifie sélectivement le nom, l'email ou les deux pour un étudiant existant
+      summary: Modifier partiellement un etudiant (PATCH)
+      tags: [Etudiants]
       requestBody:
         required: true
         content:
@@ -95,7 +96,7 @@ paths:
               $ref: '#/components/schemas/EtudiantPatch'
       responses:
         '200':
-          description: Etudiant partiellement modifie
+          description: Etudiant modifie
           content:
             application/json:
               schema:
@@ -105,16 +106,233 @@ paths:
         '404':
           $ref: '#/components/responses/ErreurIntrouvable'
     delete:
-      summary: Supprimer un etudiant
-      description: Supprime définitivement l'étudiant identifié
+      summary: Supprimer un etudiant (DELETE)
+      tags: [Etudiants]
       responses:
         '204':
-          description: Etudiant supprime avec succes (aucun contenu)
+          description: Supprime sans contenu
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+
+  # =========================================================
+  # DEPARTEMENTS
+  # =========================================================
+  /departements:
+    get:
+      summary: Lister les departements
+      tags: [Departements]
+      responses:
+        '200':
+          description: Liste des departements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Departement'
+    post:
+      summary: Creer un departement
+      tags: [Departements]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartementEntree'
+      responses:
+        '201':
+          description: Departement cree
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Departement'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+
+  /departements/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      summary: Consulter un departement
+      tags: [Departements]
+      responses:
+        '200':
+          description: Departement trouve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Departement'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    put:
+      summary: Remplacer un departement (PUT)
+      tags: [Departements]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartementEntree'
+      responses:
+        '200':
+          description: Departement mis a jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Departement'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    patch:
+      summary: Modifier partiellement un departement (PATCH)
+      tags: [Departements]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartementPatch'
+      responses:
+        '200':
+          description: Departement modifie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Departement'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    delete:
+      summary: Supprimer un departement (DELETE)
+      tags: [Departements]
+      responses:
+        '204':
+          description: Supprime sans contenu
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+
+  # =========================================================
+  # MODULES
+  # =========================================================
+  /modules:
+    get:
+      summary: Lister les modules
+      tags: [Modules]
+      responses:
+        '200':
+          description: Liste des modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Module'
+    post:
+      summary: Creer un module
+      tags: [Modules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuleEntree'
+      responses:
+        '201':
+          description: Module cree
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+
+  /modules/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      summary: Consulter un module
+      tags: [Modules]
+      responses:
+        '200':
+          description: Module trouve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    put:
+      summary: Remplacer un module (PUT)
+      tags: [Modules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuleEntree'
+      responses:
+        '200':
+          description: Module mis a jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    patch:
+      summary: Modifier partiellement un module (PATCH)
+      tags: [Modules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModulePatch'
+      responses:
+        '200':
+          description: Module modifie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '400':
+          $ref: '#/components/responses/ErreurValidation'
+        '404':
+          $ref: '#/components/responses/ErreurIntrouvable'
+    delete:
+      summary: Supprimer un module (DELETE)
+      tags: [Modules]
+      responses:
+        '204':
+          description: Supprime sans contenu
         '404':
           $ref: '#/components/responses/ErreurIntrouvable'
 
 components:
   schemas:
+    # --- Etudiants ---
     EtudiantEntree:
       type: object
       required: [nom, email]
@@ -132,12 +350,9 @@ components:
       properties:
         nom:
           type: string
-          minLength: 1
-          example: Aminata Diop
         email:
           type: string
           format: email
-          example: aminata.diop@example.org
     Etudiant:
       allOf:
         - $ref: '#/components/schemas/EtudiantEntree'
@@ -147,7 +362,74 @@ components:
             id:
               type: integer
               format: int64
-              example: 1
+
+    # --- Departements ---
+    DepartementEntree:
+      type: object
+      required: [nom, code]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          example: Informatique
+        code:
+          type: string
+          minLength: 1
+          example: INFO
+    DepartementPatch:
+      type: object
+      properties:
+        nom:
+          type: string
+        code:
+          type: string
+    Departement:
+      allOf:
+        - $ref: '#/components/schemas/DepartementEntree'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
+              format: int64
+
+    # --- Modules ---
+    ModuleEntree:
+      type: object
+      required: [code, nom]
+      properties:
+        code:
+          type: string
+          minLength: 1
+          example: SOA
+        nom:
+          type: string
+          minLength: 1
+          example: Architecture Orientee Services
+        coefficient:
+          type: integer
+          default: 1
+          example: 4
+    ModulePatch:
+      type: object
+      properties:
+        code:
+          type: string
+        nom:
+          type: string
+        coefficient:
+          type: integer
+    Module:
+      allOf:
+        - $ref: '#/components/schemas/ModuleEntree'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
+              format: int64
+
+    # --- Erreur ---
     Erreur:
       type: object
       required: [erreur, message]
@@ -157,7 +439,8 @@ components:
           example: DONNEES_INVALIDES
         message:
           type: string
-          example: Nom ou email invalide
+          example: Donnees invalides
+
   responses:
     ErreurValidation:
       description: Entree invalide
@@ -166,7 +449,7 @@ components:
           schema:
             $ref: '#/components/schemas/Erreur'
     ErreurIntrouvable:
-      description: Etudiant introuvable
+      description: Ressource introuvable
       content:
         application/json:
           schema:
