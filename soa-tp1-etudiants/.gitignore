@@ -3,13 +3,6 @@ target/
 *.war
 *.class
 
-# Documents & rapports
-*.pdf
-*.docx
-*.doc
-*.docs
-TP1.docs
-TP1 REST.pdf
 
 # IDE & system
 .idea/
